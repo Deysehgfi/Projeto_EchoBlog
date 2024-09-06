@@ -12,7 +12,7 @@ const createSchema = z.object({
 })
 
 const getSchema = z.object({
-    id: z.string().uuid({ err: "O id da tarefa está invalido" })
+    id: z.string().uuid({ err: "O id da postagem está invalido" })
 })
 
 //Controllers
@@ -93,5 +93,58 @@ export const getPostagens = async (request, response) => {
     } catch (err) {
         response.status(500).json({ err: "Erro ao listar postagens" })
         console.log(err)
+    }
+}
+
+export const updatePostagem = async (request, response) => {
+
+    const paramsValidation = getSchema.safeParse(request.params)
+    if (!paramsValidation.success) {
+        response.status(400).json({
+            message: "Os dados recebidos do corpo da requisição são inválidos",
+            detalhes: formatZodError(paramsValidation.error)
+        })
+        return
+    }
+
+    const bodyValidation = createSchema.safeParse(request.body)
+    if (!bodyValidation.success) {
+        response.status(400).json({
+            message: "Os dados recebidos do corpo da requisição são inválidos",
+            detalhes: formatZodError(bodyValidation.error)
+        })
+        return
+    }
+    const { id } = request.params
+
+    const {titulo, conteudo, autor} = request.body
+    //Validações 
+    if (!titulo) {
+        response.status(400).json({ message: "O titulo da postagem é obrigratória " })
+        return;
+    }
+    if (!conteudo) {
+        response.status(400).json({ message: "O conteudo da postagem é obrigratória " })
+        return;
+    }
+    if (!autor) {
+        response.status(400).json({ message: "O autor da postagem é obrigatório " })
+        return;
+    }
+    const postagemAtualizada = {
+       titulo,
+        conteudo,
+        autor
+    }
+    try {
+        const [linhasAfetadas] = await Postagem.update(postagemAtualizada, { where: { id } });
+        console.log(linhasAfetadas)
+        if (linhasAfetadas <= 0) {
+            response.status(404).json({ message: "Postagem não encontrada" })
+            return;
+        }
+        response.status(200).json({ message: "Postagem Atualizada com sucesso ✨" })
+    } catch (error) {
+        response.status(500).json({ err: "Error ao Atualizar postagem " })
     }
 }
