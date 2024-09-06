@@ -3,11 +3,14 @@ import express, { request, response } from "express";
 import "dotenv/config";
 import cors from "cors";
 
+
 import conn from "./config/conn.js"
 
-
+//Router 
+import PostagensRoutes from "./routes/Postagens-Routers.js"
 //models 
 import "./models/Postagens-Models.js"
+
 
 const PORT = process.env.PORT || 3333
 
@@ -24,6 +27,8 @@ conn.sync().then(() => {
     })
 }).catch((err) => { console.error(err) })
 
+
+app.use("/postagens", PostagensRoutes)
 
 app.use((request, response) => {
     response.status(404).json({ message: "Rota não encontrada (404)" })
