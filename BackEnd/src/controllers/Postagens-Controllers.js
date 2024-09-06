@@ -41,3 +41,28 @@ export const create = async (request, response) => {
         response.status(500).json({ err: "Erro ao criar Postagem" })
     }
 }
+
+export const getAll = async (request, response) => {
+    const page = parseInt(request.query.page) || 1
+    const limit = parseInt(request.query.limit) || 10
+    const offset = (page - 1) * limit
+    try {
+        const postagens = await Postagem.findAndCountAll({
+            limit,
+            offset
+        })
+        const totalPaginas = Math.ceil(postagens.count / limit)
+
+        response.status(200).json({
+            totalPostagens: postagens.count,
+            totalPaginas: totalPaginas,
+            paginaAtual: page,
+            itemsPorPages: limit,
+            proximaPag: totalPaginas === 0 ? null : `http://localhost:3333/postagens?page=${page + 1}`,
+            postagens: postagens.rows
+        })
+    } catch (err) {
+        console.error(err)
+        response.status(500).json({ message: "Erro ao listar postagens" })
+    }
+}
