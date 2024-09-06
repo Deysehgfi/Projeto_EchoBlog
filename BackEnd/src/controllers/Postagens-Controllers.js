@@ -11,6 +11,10 @@ const createSchema = z.object({
     // imagem: z.string().min(6, {message: "A imagem que deseja colocar precisa pelo menos ter 6 caracthers"})
 })
 
+const getSchema = z.object({
+    id: z.string().uuid({ err: "O id da tarefa está invalido" })
+})
+
 //Controllers
 export const create = async (request, response) => {
     // const bodyVlidation = 
@@ -64,5 +68,30 @@ export const getAll = async (request, response) => {
     } catch (err) {
         console.error(err)
         response.status(500).json({ message: "Erro ao listar postagens" })
+    }
+}
+
+export const getPostagens = async (request, response) => {
+    const paramsValidation = getSchema.safeParse(request.params)
+    if (!paramsValidation.success) {
+        response.status(400).json({
+            message: "Número de idententificação inválido",
+            detalhes: formatZodError(paramsValidation.error)
+        })
+        return;
+    }
+    const { id } = request.params
+    try {
+        const postagens = await Postagem.findByPk(id)
+        //findByPk -> obtém apenas uma única entrada da tabela, usando a chave primária fornecida no caso é o id.
+        //Listar de aorco con a cave primaria -> precisa adicinar a chave primaria
+        if (postagens === null) {
+            response.status(404).json({ err: "Postagem não encontarda" })
+            return;
+        }
+        response.status(200).json(postagens)
+    } catch (err) {
+        response.status(500).json({ err: "Erro ao listar postagens" })
+        console.log(err)
     }
 }
