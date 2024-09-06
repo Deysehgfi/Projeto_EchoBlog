@@ -15,6 +15,10 @@ const getSchema = z.object({
     id: z.string().uuid({ err: "O id da postagem está invalido" })
 })
 
+const deleteSchema = z.object({
+    id: z.string().uuid({err: "O id da postagem está inválido"})
+})
+
 //Controllers
 export const create = async (request, response) => {
     // const bodyVlidation = 
@@ -148,3 +152,23 @@ export const updatePostagem = async (request, response) => {
         response.status(500).json({ err: "Error ao Atualizar postagem " })
     }
 }
+
+export const deletePostagem = async (request, response) => {
+    const paramsValidation = deleteSchema.safeParse(request.params)
+  
+    if(!paramsValidation.success){
+      response.status(400).json({message: "Número de identificação inválido",
+      detalhes: formatZodError(paramsValidation.error)})
+      return
+    }
+      const {id} = request.params
+  
+      try {
+          const deletePostagem = await Postagem.findByPk(id)
+          await deletePostagem.destroy()
+          response.status(200).json({message: "A postagem foi deletada"}) 
+      } catch (error) {
+          response.status(500).json({err: "Erro ao deletar postagem"})
+      }
+      
+  }
