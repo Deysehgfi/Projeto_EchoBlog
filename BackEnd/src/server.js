@@ -8,9 +8,10 @@ import conn from "./config/conn.js"
 
 //Router 
 import PostagensRoutes from "./routes/Postagens-Routers.js"
+import UsuariosRoutes from "./routes/Usuarios-Routes.js"
 //models 
 import "./models/Postagens-Models.js"
-
+import "./models/Usuarios-models.js"
 
 const PORT = process.env.PORT || 3333
 
@@ -29,6 +30,7 @@ conn.sync().then(() => {
 
 
 app.use("/postagens", PostagensRoutes)
+app.use("/usuarios", UsuariosRoutes)
 
 app.use((request, response) => {
     response.status(404).json({ message: "Rota não encontrada (404)" })
