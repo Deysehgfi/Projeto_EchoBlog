@@ -8,55 +8,56 @@ import jwt from "jsonwebtoken";
 
 
 const createSchema = z.object({
-    nome: z.string().min(3, {message: "O nome deve ter pelo menos 3 caracthers"}).transform((txt) => {
-        txt.toLowerCase()}),
-        email: z.string().email({message: "Formato do email invalido"}),
-        senha: z.string().min(6, {message: "A senha deve ter no minimo 6 caracthers"}),
-        papel: z.enum(['leitor', 'administrador', 'autor']).default('leitor')
+    nome: z.string().min(3, { message: "O nome deve ter pelo menos 3 caracthers" }).transform((txt) => {
+        txt.toLowerCase()
+    }),
+    email: z.string().email({ message: "Formato do email invalido" }),
+    senha: z.string().min(6, { message: "A senha deve ter no minimo 6 caracthers" }),
+    papel: z.enum(['leitor', 'administrador', 'autor']).default('leitor')
 })
 
 export const createUser = async (request, response) => {
 
     const bodyValidation = createSchema.safeParse(request.body)
 
-    if(!bodyValidation.success){
+    if (!bodyValidation.success) {
         response.status(400).json({
             message: "Os dados recebidos do corpo da requisição são inválidos",
             detalhes: formatZodError(bodyValidation.error)
         })
-       return
+        return
     }
 
-    const { nome, email, senha, papel}= request.body
+    const { nome, email, senha, papel } = request.body
 
     const newUser = {
         nome, email, senha, papel
     }
     try {
         await Usuarios.create(newUser)
-        response.status(201).json({message: "Usuário cadastrado com sucesso! ✨"})
+        response.status(201).json({ message: "Usuário cadastrado com sucesso! ✨" })
     } catch (error) {
-        response.status(500).json({err: "Erro ao cadastrar Usuário"})
+        response.status(500).json({ err: "Erro ao cadastrar Usuário" })
     }
 
 }
 
 export const getAll = async (request, response) => {
-    const page = parseInt(request.query.page) || 1 
+    const page = parseInt(request.query.page) || 1
 
-    const limit = parseInt(request.query.limit) || 10 
+    const limit = parseInt(request.query.limit) || 10
 
     const offset = (page - 1) * limit
     try {
-       
+
         const usuarios = await Usuarios.findAndCountAll({
             limit,
             offset
         })
-       
+
         const totalPaginas = Math.ceil(usuarios.count / limit)
 
-       
+
         response.status(200).json({
             totalUsuarios: usuarios.count,
             totalPaginas: totalPaginas,
@@ -84,7 +85,7 @@ export const getUser = async (request, response) => {
     }
     try {
         const usuarios = await Usuarios.findAll({
-            where: { papel: papel},
+            where: { papel: papel },
             raw: true,
         });
         response.status(200).json(usuarios)
@@ -113,7 +114,7 @@ export const login = async (request, response) => {
             return response.status(401).json({ err: "Senha inválida" });
         }
 
-       
+
         createUserToken(usuario, request, response);
 
         response.status(200).json(usuario);
@@ -121,5 +122,5 @@ export const login = async (request, response) => {
         response.status(500).json({ err: "Erro ao buscar usuário" });
     }
 
-        //verificar se a senha existe/ comparar senha 
+    //verificar se a senha existe/ comparar senha 
 }
