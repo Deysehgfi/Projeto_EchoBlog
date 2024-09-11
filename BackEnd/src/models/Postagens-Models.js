@@ -22,11 +22,8 @@ const Postagem = conn.define("postagens",
         type: DataTypes.STRING,
         allowNull: true
     }
-    // },
-    // image: {
-    //     type: DataTypes.STRING,
-    //     allowNull: false
-    // }
+  
+    
 },{
     tableName: "postagens",
 })

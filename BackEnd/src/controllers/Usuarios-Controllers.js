@@ -1,10 +1,8 @@
-import { request, response, text } from "express";
 import { z } from "zod";
 import Usuarios from "../models/Usuarios-models.js"
 import formatZodError from "../helpers/FormatZodError.js";
-import conn from "../config/conn.js";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+
 
 
 const createSchema = z.object({

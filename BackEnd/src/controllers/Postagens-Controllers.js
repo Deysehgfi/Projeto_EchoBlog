@@ -8,7 +8,6 @@ const createSchema = z.object({
     titulo: z.string().min(3, { message: "O titulo da postagem deve pelo menos ter 3 caracthers" }).transform((txt) => txt.toLowerCase()),
     conteudo: z.string().min(5, { message: "O conteudo da postagem deve ter pelo menos 5 caracthers" }),
     autor: z.string().min(5, { message: "O Auto do conteudo da postagens deve ter pelo menos 5 caracthers" })
-    // imagem: z.string().min(6, {message: "A imagem que deseja colocar precisa pelo menos ter 6 caracthers"})
 })
 
 const getSchema = z.object({
@@ -30,20 +29,30 @@ export const create = async (request, response) => {
             message: "Os dados recebidos do corpo da requisição são inválidos",
             detalhes: formatZodError(bodyValidation.error)
         })
-        // console.log(bodyValidation)
+    
         return
     }
     const { titulo, conteudo, autor } = request.body
+    let imagem 
+    if(request.file){
+        imagem = request.file.filename
+    } else {
+        imagem = "postagemDefault.png"
+    }
+
 
     const novaPostagem = {
         titulo,
         conteudo,
-        autor
+        autor,
+        imagem
     }
+    
 
     try {
         await Postagem.create(novaPostagem)
         response.status(201).json({ message: "Postagem criada com sucesso ✨" })
+    
     } catch (error) {
         console.error(error)
         response.status(500).json({ err: "Erro ao criar Postagem" })
