@@ -18,7 +18,7 @@ const deleteSchema = z.object({
     id: z.string().uuid({err: "O id da postagem está inválido"})
 })
 
-//Controllers
+//Controllers         
 export const create = async (request, response) => {
     // const bodyVlidation = 
     const bodyValidation = createSchema.safeParse(request.body)

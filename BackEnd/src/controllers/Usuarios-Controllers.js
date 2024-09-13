@@ -14,6 +14,7 @@ const createSchema = z.object({
     papel: z.enum(['leitor', 'administrador', 'autor']).default('leitor')
 })
 
+
 export const createUser = async (request, response) => {
 
     const bodyValidation = createSchema.safeParse(request.body)
@@ -39,6 +40,8 @@ export const createUser = async (request, response) => {
     }
 
 }
+
+
 
 export const getAll = async (request, response) => {
     const page = parseInt(request.query.page) || 1
@@ -121,4 +124,45 @@ export const login = async (request, response) => {
     }
 
     //verificar se a senha existe/ comparar senha 
+}
+
+export const updateUsuario = async (request, response) => {
+
+    const paramsValidation = getSchema.safeParse(request.params)
+    if (!paramsValidation.success) {
+        response.status(400).json({
+            message: "Os dados recebidos do corpo da requisição são inválidos",
+            detalhes: formatZodError(paramsValidation.error)
+        })
+        return
+    }
+
+    const bodyValidation = createSchema.safeParse(request.body)
+    if (!bodyValidation.success) {
+        response.status(400).json({
+            message: "Os dados recebidos do corpo da requisição são inválidos",
+            detalhes: formatZodError(bodyValidation.error)
+        })
+        return
+    }
+    const { id } = request.params
+
+    const {nome, email, senha} = request.body
+   
+    const UsuarioAtualizado = {
+       nome ,
+        email,
+        senha
+    }
+    try {
+        const [linhasAfetadas] = await Usuarios.update(UsuarioAtualizado, { where: { id } });
+        console.log(linhasAfetadas)
+        if (linhasAfetadas <= 0) {
+            response.status(404).json({ message: "Usuario não encontrado" })
+            return;
+        }
+        response.status(200).json({ message: "Usuario Atualizado com sucesso ✨" })
+    } catch (error) {
+        response.status(500).json({ err: "Error ao Atualizar usuario " })
+    }
 }
