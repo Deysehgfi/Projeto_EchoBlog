@@ -2,6 +2,9 @@ import conn  from "../config/conn.js";
 
 import { DataTypes } from "sequelize";
 
+
+import Usuarios from "./Usuarios-models.js";
+
 const Postagem = conn.define("postagens", 
 {
     id:{
@@ -28,5 +31,6 @@ const Postagem = conn.define("postagens",
     tableName: "postagens",
 })
 
-
+Usuarios.hasMany(Postagem)
+Postagem.belongsTo(Usuarios)
 export default Postagem;

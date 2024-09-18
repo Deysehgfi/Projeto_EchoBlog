@@ -2,6 +2,8 @@ import conn from "../config/conn.js";
 
 import { DataTypes } from "sequelize";
 
+
+
 const Usuarios = conn.define("usuarios",{
     id: {
         type: DataTypes.UUID,
@@ -28,6 +30,8 @@ const Usuarios = conn.define("usuarios",{
 },{
     tableName: "usuarios"
 })
+
+
 
 
 export default Usuarios;
