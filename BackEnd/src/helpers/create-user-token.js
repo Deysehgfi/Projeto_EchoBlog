@@ -1,25 +1,20 @@
 import jwt from "jsonwebtoken";
 
-//assincrona
+import "dotenv/config";
+
 const createUserToken = async (usuario, request, response) => {
-    //criar Token
-    //login do usuario
-    const token = jwt.sign(
-        {
+        const token = jwt.sign({
             nome: usuario.nome,
-            id: usuario.id,
-        },
-        "1234567" //senha 
+            id: usuario.id
+        }, process.env.TOKEN_PASSWORD, {
+            expiresIn: "12h" // o token expira em 12hrs
+        });
 
-    )
-
-    //retornar o token
-
-    response.status(200).json({
-        message: "Você está logado!",
-        token: token,
-        usuarioId: usuario.id
-    })
-}
+        response.status(200).json({
+            message: "Você está autenticado",
+            token: token,
+            usuarioID: usuario.id
+        });
+};
 
 export default createUserToken;

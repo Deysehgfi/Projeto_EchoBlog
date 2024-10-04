@@ -5,6 +5,8 @@ import cors from "cors";
 import  path  from "node:path"
 import { fileURLToPath } from "node:url";
 
+
+
 // npm install --save multer
 
 
@@ -17,9 +19,9 @@ import UsuariosRoutes from "./routes/Usuarios-Routes.js"
 import "./models/Postagens-Models.js"
 import "./models/Usuarios-models.js"
 import "./models/Comentarios.js"
-import { url } from "node:inspector";
 
-const PORT = process.env.PORT || 3333
+
+const PORT = process.env.PORT;
 
 const app = express()
 
@@ -37,11 +39,6 @@ app.use(express.json())
 //middleware necessário para imagens
 app.use("/public",express.static(path.join(__dirname, "public")))
 
-conn.sync(/*{force: true} -> utiliz para não precisar entar no workbrench para deletear o banco e criar de novo */).then(() => {
-    app.listen(PORT, () => {
-        console.log(`Servidor on http://localhost:${PORT}`)
-    })
-}).catch((err) => { console.error(err) })
 
 
 app.use("/postagens", PostagensRoutes)
@@ -50,3 +47,9 @@ app.use("/usuarios", UsuariosRoutes)
 app.use((request, response) => {
     response.status(404).json({ message: "Rota não encontrada (404)" })
 })
+
+conn.sync(/*{force: true} -> utiliz para não precisar entar no workbrench para deletear o banco e criar de novo */).then(() => {
+    app.listen(PORT, () => {
+        console.log(`Servidor on http://localhost:${PORT}`)
+    })
+}).catch((err) => { console.error(err) })

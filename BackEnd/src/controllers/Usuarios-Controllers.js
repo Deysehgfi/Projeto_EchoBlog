@@ -2,6 +2,7 @@ import { z } from "zod";
 import Usuarios from "../models/Usuarios-models.js" //import a tabela
 import bcrypt from "bcrypt"; //criptografar a senha do usuario 
 import formatZodError from "../helpers/formatZodError.js"
+import createUserToken from "../helpers/create-user-token.js";
 
 
 const createSchema = z.object({
@@ -11,6 +12,12 @@ const createSchema = z.object({
     email: z.string().email({ message: "Formato do email invalido" }),
     senha: z.string().min(6, { message: "A senha deve ter no minimo 6 caracthers" }),
     // papel: z.enum(['leitor', 'administrador', 'autor']).default('leitor')
+})
+
+const loginSchema = z.object({
+    email: z.string().email({message: "Email inavalido"}),
+    senha: z.string().min(6,{message:"A senha deve conter no minino 6 caracthers "})
+
 })
 
 
@@ -49,17 +56,21 @@ export const createUser = async (request, response) => {
         //1° Verificar um email existente
         const verificaEmail = await Usuarios.findOne({where: {email}})
 
-
         if(verificaEmail){
-            return;
+            return response.status(401).json({err: "E-mail já está em uso!"})
         }
 
-
-
-
+        //2° cadastrar o usuario 
         await Usuarios.create(newUser)
+
+        const selectNovoUsuario = Usuarios.findOne({where: {email}, raw: true})
+
+        await createUserToken(selectNovoUsuario,request, response)
         response.status(201).json({ message: "Usuário cadastrado com sucesso! ✨" })
+
+
     } catch (error) {
+        console.log(error)
         response.status(500).json({ err: "Erro ao cadastrar Usuário" })
     }
 
@@ -120,34 +131,49 @@ export const getUser = async (request, response) => {
 }
 
 export const login = async (request, response) => {
-    const { email, senha } = request.body;
+    const loginValidation = loginSchema.safeParse(request.body)
+
+    if(!loginValidation.success){
+       return response.status(400).json({
+            err: "os dados recebidos do corpo da aplicação são inválidos",
+            detalhes: formatZodError(loginValidation.error)
+        })
+        
+    }
+
+
+    const { email, senha } = loginValidation.data;
+    //todos os dados vindos da requisição.body 
+
 
     try {
+
+        //verificar se o email exite no banco de dados
         const usuario = await Usuarios.findOne({ where: { email } });
 
         if (!usuario) {
             return response.status(404).json({ err: "Usuário não encontrado" });
         }
 
+        //retorna dois valores -> True || False
         const compararSenha = await bcrypt.compare(senha, usuario.senha);
+        console.log("email:", usuario.email)
         console.log("senha:", senha)
         console.log("senha do usuario:", usuario.senha)
         console.log("comparar senha:", compararSenha)
 
 
         if (!compararSenha) {
+            //pode adicionar uma variavel contadora
             return response.status(401).json({ err: "Senha inválida" });
         }
-
-
-        createUserToken(usuario, request, response);
+         await createUserToken(usuario, request, response);
 
         response.status(200).json(usuario);
-    } catch (err) {
+    } catch (error) {
+        console.log(error)
         response.status(500).json({ err: "Erro ao buscar usuário" });
     }
-
-    //verificar se a senha existe/ comparar senha 
 }
 
 export const updateUsuario = async (request, response) => {

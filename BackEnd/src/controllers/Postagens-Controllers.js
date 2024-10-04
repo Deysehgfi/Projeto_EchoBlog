@@ -2,12 +2,11 @@ import Postagem from "../models/Postagens-Models.js";
 import { z } from "zod"
 import formatZodError from "../helpers/FormatZodError.js";
 import { request, response } from "express";
-
+import getToken from "../helpers/get-token.js";
 //Validações
 const createSchema = z.object({
     titulo: z.string().min(3, { message: "O titulo da postagem deve pelo menos ter 3 caracthers" }).transform((txt) => txt.toLowerCase()),
     conteudo: z.string().min(5, { message: "O conteudo da postagem deve ter pelo menos 5 caracthers" }),
-    autor: z.string().min(5, { message: "O Auto do conteudo da postagens deve ter pelo menos 5 caracthers" })
     // imagem: z.string().min(6, {message: "A imagem que deseja colocar precisa pelo menos ter 6 caracthers"})
 })
 
@@ -21,6 +20,11 @@ const deleteSchema = z.object({
 
 //Controllers
 export const create = async (request, response) => {
+
+
+    const token = getToken(request)
+    const usuario = await getUserByToken(token)
+    
     // const bodyVlidation = 
     const bodyValidation = createSchema.safeParse(request.body)
     console.log(bodyValidation)
@@ -33,12 +37,11 @@ export const create = async (request, response) => {
         // console.log(bodyValidation)
         return
     }
-    const { titulo, conteudo, autor } = request.body
+    const { titulo, conteudo} = request.body
 
     const novaPostagem = {
         titulo,
-        conteudo,
-        autor
+        conteudo
     }
 
     try {
